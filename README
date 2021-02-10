@@ -10,7 +10,7 @@ Installation
 
 Requirements:
 * glibc
-* openssl
+* openssl > 1.0.1
 
 $ make
 # make install
