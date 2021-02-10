@@ -1,7 +1,10 @@
 CC = gcc
 TARGET = lc19
-CFLAGS = -Wall -I. -L/usr/lib -lssl -lcrypto
-OBJFILES = lc19.o args.o
+OBJFILES = lc19.o args.o ssl.o
+
+PREFIX = /usr/local
+
+CFLAGS = -Wall -std=c99 -pedantic -I. -L/usr/lib -lssl -lcrypto
 
 .phony: all clean install
 
@@ -11,7 +14,7 @@ clean:
 	rm -f ${OBJFILES} ${TARGET}
 
 install:
-	cp ${TARGET} /usr/local/bin/
+	cp ${TARGET} ${PREFIX}/bin/
 
 ${TARGET}: ${OBJFILES}
 	${CC} ${CFLAGS} -o ${TARGET} ${OBJFILES}
