@@ -1,0 +1,26 @@
+lc19
+====
+
+A simple server for the Gemini protocol written in C.
+The name is an allusion to Launch Complex 19, where NASA launched all of the Gemini manned spaceflights.
+Tested on GNU/Linux. Created by Theo Henson <theodorehenson at protonmail dot com>.
+
+Installation
+============
+
+Requirements:
+* glibc
+* openssl
+
+$ make
+# make install
+
+Usage
+=====
+
+lc19 [-p PORT] [-d DIR] [-c CERT] [-k KEY]
+
+License
+=======
+
+All files are released under the Unlicense, a public domain equivalent license.
