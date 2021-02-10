@@ -53,6 +53,7 @@ void load_cert(SSL_CTX *ctx, char *cert, char *key) {
 	}
 }
 
+// Takes the port to bind to and returns the file descriptor of a newly initialized socket
 int init_fd(int port) {
 
 	// Create socket

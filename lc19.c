@@ -65,10 +65,10 @@ int main(int argc, char **argv) {
 		// Accept connection
 		int client;
 		if ((client = accept(server, (struct sockaddr *)&addr, (socklen_t*)&addrlen)) < 0) {
-			fprintf(stderr, "error: failed to accept");
+			fprintf(stderr, "Error: Failed to accept incoming connection");
 			continue;
 		}
-		printf("Connected: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+		printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 		SSL_set_fd(ssl, client);
 
 		handle(ssl);

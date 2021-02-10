@@ -5,7 +5,7 @@
 
 const char *argp_program_version = "lc19 version 0.1.0";
 const char *argp_program_bug_address = "<theodorehenson at protonmail dot com>";
-const char doc[] = "A simple gemini server";
+const char doc[] = "A simple server for the Gemini protocol.";
 
 struct argp_option options[] = {
 	{ "port", 'p', "PORT", 0, "The port to listen on" },
