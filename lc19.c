@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <malloc.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <argp.h>
@@ -10,29 +11,56 @@
 
 #include "args.h"
 #include "ssl.h"
+#include "endpoint.h"
 
-void handle(SSL *ssl) {
+// TODO: multithreading
+void handle(SSL *ssl, endpoint *e) {
 
 	// Initialize buffer and response data
-	char buf[1024] = {0};
+	char buf[1027] = {0};
 	int fd, mlen;
-	const char *resp = "# lc19";
 
 	if (SSL_accept(ssl) == -1) {
 		ERR_print_errors_fp(stderr);
-	} else {
-		// Read into buffer
-		mlen = SSL_read(ssl, buf, sizeof(buf));
-		buf[mlen] = '\0';
-		printf("C: %s\n", buf);
-		if (mlen > 0) {
-			SSL_write(ssl, resp, strlen(resp));
-		} else {
-			ERR_print_errors_fp(stderr);
-		}
+		fd = SSL_get_fd(ssl);
+		SSL_free(ssl);
+		close(fd);
+		return;
 	}
 
-	// Close socket
+	// Read into buffer
+	mlen = SSL_read(ssl, buf, sizeof(buf));
+	buf[mlen] = '\0';
+
+	if (mlen <= 0) {
+		ERR_print_errors_fp(stderr);
+		fd = SSL_get_fd(ssl);
+		SSL_free(ssl);
+		close(fd);
+		return;
+	}
+	printf("C: %s", buf);
+
+	// Send response header
+	response resp = url_to_response(buf, e);
+	if (resp.code == 20) {
+		char *header = malloc(2 + strlen(resp.mime));
+		sprintf(header, "%d ", resp.code);
+		strcat(header, resp.mime);
+		strcat(header, "\r\n");
+		SSL_write(ssl, header, strlen(header));
+		free(header);
+
+		// Send response body
+		SSL_write(ssl, resp.file_path, strlen(resp.file_path));
+		printf("S: %s %s\n", resp.mime, resp.file_path);
+	} else {
+		char header[11];
+		sprintf(header, "%d error\r\n", resp.code);
+		SSL_write(ssl, header, strlen(header));
+		printf("Error: %s\n", header);
+	}
+
 	fd = SSL_get_fd(ssl);
 	SSL_free(ssl);
 	close(fd);
@@ -54,6 +82,11 @@ int main(int argc, char **argv) {
 	// Initialize server
 	int server = init_fd(arguments.port);
 
+	// Create endpoints
+	int ne = line_count("./endpoints");
+	endpoint *e = malloc((ne + 1) * sizeof(endpoint)); // + 1 to compensate for end marker
+	get_endpoints(e, ".");
+
 	// Accept connections
 	while (1) {
 
@@ -71,7 +104,7 @@ int main(int argc, char **argv) {
 		printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 		SSL_set_fd(ssl, client);
 
-		handle(ssl);
+		handle(ssl, e);
 	}
 
 	close(server);

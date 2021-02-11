@@ -1,6 +1,6 @@
 CC = gcc
 TARGET = lc19
-OBJFILES = lc19.o args.o ssl.o
+OBJFILES = lc19.o args.o ssl.o endpoint.o
 
 PREFIX = /usr/local
 
