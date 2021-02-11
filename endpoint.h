@@ -11,9 +11,10 @@ typedef struct {
 	int code;
 } response;
 
-typedef struct {
+typedef struct cache {
 	char file_path[256];
 	char *data;
+	struct cache *next;
 } cache;
 
 int line_count(char *file);

@@ -5,6 +5,9 @@
 #include <malloc.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
+#include <sys/sendfile.h>
+#include <fcntl.h>
 #include <argp.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -13,11 +16,26 @@
 #include "ssl.h"
 #include "endpoint.h"
 
+#define SEND_BUF 1027
+
+void close_ssl(SSL *ssl) {
+	int fd = SSL_get_fd(ssl);
+	SSL_free(ssl);
+	close(fd);
+}
+
+void send_error(SSL *ssl, response resp) {
+	char header[11];
+	sprintf(header, "%d error\r\n", resp.code);
+	SSL_write(ssl, header, strlen(header));
+	printf("Error: %s", header);
+}
+
 // TODO: multithreading
 void handle(SSL *ssl, endpoint *e) {
 
 	// Initialize buffer and response data
-	char buf[1027] = {0};
+	char buf[SEND_BUF] = {0};
 	int fd, mlen;
 
 	if (SSL_accept(ssl) == -1) {
@@ -43,27 +61,41 @@ void handle(SSL *ssl, endpoint *e) {
 
 	// Send response header
 	response resp = url_to_response(buf, e);
-	if (resp.code == 20) {
-		char *header = malloc(2 + strlen(resp.mime));
-		sprintf(header, "%d ", resp.code);
-		strcat(header, resp.mime);
-		strcat(header, "\r\n");
-		SSL_write(ssl, header, strlen(header));
-		free(header);
-
-		// Send response body
-		SSL_write(ssl, resp.file_path, strlen(resp.file_path));
-		printf("S: %s %s\n", resp.mime, resp.file_path);
-	} else {
-		char header[11];
-		sprintf(header, "%d error\r\n", resp.code);
-		SSL_write(ssl, header, strlen(header));
-		printf("Error: %s", header);
+	if (resp.code != 20) {
+		send_error(ssl, resp);
+		close_ssl(ssl);
+		return;
 	}
 
-	fd = SSL_get_fd(ssl);
-	SSL_free(ssl);
-	close(fd);
+	char *header = malloc(2 + strlen(resp.mime));
+	sprintf(header, "%d ", resp.code);
+	strcat(header, resp.mime);
+	strcat(header, "\r\n");
+	SSL_write(ssl, header, strlen(header));
+	free(header);
+
+	// Send response body
+	int sfd;
+	struct stat file_stat;
+	if ((sfd = open(resp.file_path, O_RDONLY)) < 0) {
+		resp.code = 40;
+		send_error(ssl, resp);
+		close_ssl(ssl);
+		return;
+	}
+	if ((fstat(sfd, &file_stat)) < 0) {
+		resp.code = 40;
+		send_error(ssl, resp);
+		close_ssl(ssl);
+		return;
+	}
+	printf("S: %s %s\n", resp.mime, resp.file_path);
+	while (read(sfd, buf, SEND_BUF)) {
+		SSL_write(ssl, buf, SEND_BUF);
+	}
+
+	close(sfd);
+	close_ssl(ssl);
 }
 
 int main(int argc, char **argv) {
@@ -83,9 +115,11 @@ int main(int argc, char **argv) {
 	int server = init_fd(arguments.port);
 
 	// Create endpoints
-	int ne = line_count("./endpoints");
+	char *e_file = malloc(strlen(arguments.dir) + 11);
+	sprintf(e_file, "%s/%s", arguments.dir, "endpoints");
+	int ne = line_count(e_file);
 	endpoint *e = malloc((ne + 1) * sizeof(endpoint)); // + 1 to compensate for end marker
-	get_endpoints(e, ".");
+	get_endpoints(e, e_file);
 
 	// Accept connections
 	while (1) {

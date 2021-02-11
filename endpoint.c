@@ -6,16 +6,20 @@
 
 #include "endpoint.h"
 
-const char *e_file = "endpoints";
-
 #define SCHEME "gemini://"
 #define SCHEME_LEN 9
 
+#define E_FILE "endpoints"
+#define E_FILE_LEN 9
+
 // Gets the number of lines in a file
 int line_count(char *file) {
-	FILE *fp; 
 	int c, count = 0;
-	fp = fopen(file, "r"); 
+	FILE *fp; 
+	if (!(fp = fopen(file, "r"))) {
+		fprintf(stderr, "Error: Failed to open %s. (Does it exist?)\n", file);
+		abort();
+	}
 	for (c = getc(fp); c != EOF; c = getc(fp)) 
 		if (c == '\n')
 			count++;
@@ -65,7 +69,6 @@ response url_to_response(char *url, endpoint *endpoints) {
 	// Find the endpoint at the url
 	int e_index = -1;
 	for (int i = 0; endpoints[i].end; i++)  {
-		printf("url:%s|url_path:%s\n", endpoints[i].url_path, url_path);
 		if (strcmp(url_path, endpoints[i].url_path) == 0) {
 			e_index = i;
 			break;
@@ -82,13 +85,7 @@ response url_to_response(char *url, endpoint *endpoints) {
 }
 
 // Populates an array with endpoints parsed from the endpoints file
-void get_endpoints(endpoint *endpoints, char *dir) {
-
-	// Initialize the path
-	char *path = malloc(sizeof(dir) + sizeof(e_file) + 2);
-	strcpy(path, dir);
-	strcat(path, "/");
-	strcat(path, e_file);
+void get_endpoints(endpoint *endpoints, char *path) {
 
 	// Open the endpoints file
 	FILE *fp = fopen(path, "r");
