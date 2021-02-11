@@ -101,7 +101,7 @@ void handle(SSL *ssl, endpoint *e) {
 int main(int argc, char **argv) {
 
 	// Parse command-line arguments
-	env arguments = { 1965, ".", "../ssl/server.crt", "../ssl/server.key" };
+	env arguments = { 1965, ".", "../ssl/cert.pem", "../ssl/key.pem" };
 	argp_parse(&parser, argc, argv, 0, 0, &arguments);
 
 	// Initialize SSL
