@@ -16,8 +16,8 @@ int line_count(char *file) {
 	FILE *fp; 
 	int c, count = 0;
 	fp = fopen(file, "r"); 
-	for(c = getc(fp); c != EOF; c = getc(fp)) 
-		if(c == '\n')
+	for (c = getc(fp); c != EOF; c = getc(fp)) 
+		if (c == '\n')
 			count++;
 	fclose(fp);
 	return count;
@@ -65,6 +65,7 @@ response url_to_response(char *url, endpoint *endpoints) {
 	// Find the endpoint at the url
 	int e_index = -1;
 	for (int i = 0; endpoints[i].end; i++)  {
+		printf("url:%s|url_path:%s\n", endpoints[i].url_path, url_path);
 		if (strcmp(url_path, endpoints[i].url_path) == 0) {
 			e_index = i;
 			break;
@@ -102,53 +103,43 @@ void get_endpoints(endpoint *endpoints, char *dir) {
 	char line[1024];
 	while (fgets(line, sizeof(line), fp)) {
 
-		int cache = 0;
-		char *mime, *file_path;
-		char *url_path;
-		strcpy(url_path, "");
+		char mime[256], file_path[256], url_path[256];
+		url_path[0] = '\0';
 		int field = 0;
 
 		// Iterate each token
 		for (char *tok = strtok(line, "\t"); tok != NULL; tok = strtok(NULL, "\t")) {
 			switch (field) {
 			case 0:
-				mime = tok;
+				strcpy(mime, tok);
 				break;
 			case 1:
-				file_path = tok;
+				strcpy(file_path, tok);
 				break;
 			case 2:
-				url_path = tok;
-				break;
-			case 3:
-				cache = 1;
+				strcpy(url_path, tok);
 				break;
 			}
 			field++;
 		}
-		if (cache == 0) {
-			if (url_path != NULL) {
-				strtok(url_path, "\n");
-			} else {
-				url_path = file_path;
-			}
-		}
 
+		// Copy the parsed data
 		endpoints[line_num] = (endpoint){ .end = 1 };
 		strcpy(endpoints[line_num].mime, mime);
 		if (url_path[0] == '\0') {
-			file_path[strlen(file_path) - 1] = '\0';
+			strtok(file_path, "\n");
 			strcpy(endpoints[line_num].file_path, file_path);
 			strcpy(endpoints[line_num].url_path, "/");
 			strcat(endpoints[line_num].url_path, file_path);
 		} else {
+			strtok(url_path, "\n");
 			strcpy(endpoints[line_num].file_path, file_path);
 			strcpy(endpoints[line_num].url_path, url_path);
 		}
 
 		line_num++;
 	}
-	endpoints[line_num] = (endpoint){ .end = 0 };
 
+	endpoints[line_num] = (endpoint){ .end = 0 };
 	fclose(fp);
 }

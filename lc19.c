@@ -58,7 +58,7 @@ void handle(SSL *ssl, endpoint *e) {
 		char header[11];
 		sprintf(header, "%d error\r\n", resp.code);
 		SSL_write(ssl, header, strlen(header));
-		printf("Error: %s\n", header);
+		printf("Error: %s", header);
 	}
 
 	fd = SSL_get_fd(ssl);
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Error: Failed to accept incoming connection");
 			continue;
 		}
-		printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+		printf("\nNew: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 		SSL_set_fd(ssl, client);
 
 		handle(ssl, e);

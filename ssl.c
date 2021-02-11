@@ -60,7 +60,7 @@ int init_fd(int port) {
 	int fd;
 	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == 0) {
 		fprintf(stderr, "Error: Failed to create socket");
-		return EXIT_FAILURE;
+		return 0;
 	}
 
 	// Bind port
