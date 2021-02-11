@@ -57,11 +57,12 @@ void load_cert(SSL_CTX *ctx, char *cert, char *key) {
 int init_fd(int port) {
 
 	// Create socket
-	int fd;
+	int fd, on = 1;
 	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == 0) {
 		fprintf(stderr, "Error: Failed to create socket");
 		return 0;
 	}
+	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
 	// Bind port
 	struct sockaddr_in addr;

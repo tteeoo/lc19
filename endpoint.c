@@ -42,12 +42,14 @@ response url_to_response(char *url, endpoint *endpoints) {
 	// Verify scheme is gemini://
 	url[strlen(url) - 2] = '\0';
 	int le = strlen(url);
-	char r_scheme[SCHEME_LEN+1];
+	char r_scheme[SCHEME_LEN + 1] = { '\0' };
 	if (le <= SCHEME_LEN)
 		return (response){ .code = 59 };
-	strncpy(r_scheme, url, 9);
-	if (strcmp(r_scheme, SCHEME) != 0)
+	strncpy(r_scheme, url, SCHEME_LEN);
+	if (strcmp(r_scheme, SCHEME) != 0) {
+		printf("%s %s\n", r_scheme, SCHEME);
 		return (response){ .code = 59 };
+	}
 
 	// Get requested path, ignoring host
 	char url_path[256];

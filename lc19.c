@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/sendfile.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <argp.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -17,6 +18,16 @@
 #include "endpoint.h"
 
 #define SEND_BUF 1027
+
+int server;
+SSL_CTX *ctx;
+
+void handle_sigint(int signum) {
+	printf("\nGot signal %d, shutting down...\n", signum);
+	close(server);
+	SSL_CTX_free(ctx);
+	exit(0);
+}
 
 void close_ssl(SSL *ssl) {
 	int fd = SSL_get_fd(ssl);
@@ -100,19 +111,22 @@ void handle(SSL *ssl, endpoint *e) {
 
 int main(int argc, char **argv) {
 
+	// Assign signal handlers
+	signal(SIGINT, handle_sigint);
+
 	// Parse command-line arguments
 	env arguments = { 1965, ".", "../ssl/server.crt", "../ssl/server.key" };
 	argp_parse(&parser, argc, argv, 0, 0, &arguments);
 
 	// Initialize SSL
 	SSL_library_init();
-	SSL_CTX *ctx = init_ctx();
+	ctx = init_ctx();
 
 	// Load certificates
 	load_cert(ctx, arguments.cert, arguments.key);
 
 	// Initialize server
-	int server = init_fd(arguments.port);
+	server = init_fd(arguments.port);
 
 	// Create endpoints
 	char *e_file = malloc(strlen(arguments.dir) + 11);
