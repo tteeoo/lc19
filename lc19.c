@@ -18,18 +18,17 @@ void handle(SSL *ssl) {
 	int fd, mlen;
 	const char *resp = "# lc19";
 
-	if (SSL_accept(ssl) == -1) {
+	if (SSL_accept(ssl) == -1)
 		ERR_print_errors_fp(stderr);
-	} else {
+	else {
 		// Read into buffer
 		mlen = SSL_read(ssl, buf, sizeof(buf));
 		buf[mlen] = '\0';
 		printf("C: %s\n", buf);
-		if (mlen > 0) {
+		if (mlen > 0)
 			SSL_write(ssl, resp, strlen(resp));
-		} else {
+		else
 			ERR_print_errors_fp(stderr);
-		}
 	}
 
 	// Close socket

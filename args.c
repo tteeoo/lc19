@@ -7,6 +7,7 @@ const char *argp_program_version = "lc19 version 0.1.0";
 const char *argp_program_bug_address = "<theodorehenson at protonmail dot com>";
 const char doc[] = "A simple server for the Gemini protocol.";
 
+// Define options for arg parse
 struct argp_option options[] = {
 	{ "port", 'p', "PORT", 0, "The port to listen on" },
 	{ "dir",  'd', "DIR",  0, "The directory to serve" },
@@ -15,6 +16,7 @@ struct argp_option options[] = {
 	{ 0 }
 };
 
+// Parses options
 error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	env *arguments = state->input;
 	switch (key) {

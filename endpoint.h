@@ -5,3 +5,5 @@ typedef struct {
 	int cache;
 	char *data;
 } endpoint;
+
+int get_endpoints(endpoint *endpoints, char *dir);
