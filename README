@@ -20,6 +20,16 @@ Usage
 
 lc19 [-p PORT] [-d DIR] [-c CERT] [-k KEY]
 
+Create DIR/endpoints, tab separated values for each endpoint:
+<mimetype>  <file path> [url path]
+...
+
+Example:
+text/gemini index.gmi
+text/gemini index.gmi /
+text/gemini about.gmi
+image/png images/cats.png /cats.png
+
 License
 =======
 
