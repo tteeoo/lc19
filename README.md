@@ -36,9 +36,11 @@ image/png	images/cats.png	/cats.png
 
 (By default files will be served at /<file path>, but if [url path] is specified then that will be used.)
 
-Then run the server like so:
+Then run the server with the following syntax:
 
+```
 lc19 [-p PORT] [-d DIR] [-c CERT] [-k KEY]
+```
 
 Example:
 
