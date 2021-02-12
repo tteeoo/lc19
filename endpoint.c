@@ -44,11 +44,11 @@ response url_to_response(char *url, endpoint *endpoints) {
 	int le = strlen(url);
 	char r_scheme[SCHEME_LEN + 1] = { '\0' };
 	if (le <= SCHEME_LEN)
-		return (response){ .code = 59 };
+		return (response){ .code = 59, .mime = "Request too short" };
 	strncpy(r_scheme, url, SCHEME_LEN);
 	if (strcmp(r_scheme, SCHEME) != 0) {
 		printf("%s %s\n", r_scheme, SCHEME);
-		return (response){ .code = 59 };
+		return (response){ .code = 59, .mime = "Improper protocol scheme" };
 	}
 
 	// Get requested path, ignoring host
@@ -77,7 +77,7 @@ response url_to_response(char *url, endpoint *endpoints) {
 		}
 	}
 	if (e_index == -1)
-		return (response){ .code = 51 };
+		return (response){ .code = 51, .mime = "Not found, á la 404" };
 	endpoint e = endpoints[e_index];
 
 	response resp = (response){ .code = 20 };

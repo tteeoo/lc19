@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <strings.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,6 +11,13 @@
 
 // N for listen(FD, N)
 const int lq = 12;
+
+// Close the ssl file descriptor
+void close_ssl(SSL *ssl) {
+	int fd = SSL_get_fd(ssl);
+	SSL_free(ssl);
+	close(fd);
+}
 
 // Initializes OpenSSL and returns an SSL context
 SSL_CTX* init_ctx() {
