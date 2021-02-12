@@ -1,6 +1,6 @@
 # lc19
 
-A simple server for the Gemini protocol written in C.
+A simple (<500 SLOC) server for the Gemini protocol written in C.
 The name is an allusion to Launch Complex 19, where NASA launched all of the Gemini manned spaceflights.
 Tested on GNU/Linux. Created by Theo Henson <theodorehenson at protonmail dot com>.
 
