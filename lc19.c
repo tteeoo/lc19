@@ -86,7 +86,7 @@ void handle(SSL *ssl, endpoint *e) {
 	free(header);
 
 	// Send response body
-	int sfd;
+	int sfd, n;
 	struct stat file_stat;
 	if ((sfd = open(resp.file_path, O_RDONLY)) < 0) {
 		resp.code = 40;
@@ -101,8 +101,11 @@ void handle(SSL *ssl, endpoint *e) {
 		return;
 	}
 	printf("S: %s %s\n", resp.mime, resp.file_path);
-	while (read(sfd, buf, SEND_BUF)) {
-		SSL_write(ssl, buf, SEND_BUF);
+	while ((n = read(sfd, buf, SEND_BUF))) {
+		if (SSL_write(ssl, buf, n) < 0) {
+			ERR_print_errors_fp(stderr);
+			break;
+		}
 	}
 
 	close(sfd);
