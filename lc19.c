@@ -29,6 +29,7 @@ void handle_sighup(int signum) {
 	char *e_file = malloc(strlen(arguments.dir) + 11);
 	sprintf(e_file, "%s/%s", arguments.dir, "endpoints");
 	int ne = line_count(e_file);
+	free(e);
 	e = malloc((ne + 1) * sizeof(endpoint)); // + 1 to compensate for end marker
 	get_endpoints(e, e_file);
 }

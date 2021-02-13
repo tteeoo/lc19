@@ -77,7 +77,7 @@ response url_to_response(char *url, endpoint *endpoints) {
 		}
 	}
 	if (e_index == -1)
-		return (response){ .code = 51, .mime = "Not found, á la 404" };
+		return (response){ .code = 51, .mime = "Not found, à la 404" };
 	endpoint e = endpoints[e_index];
 
 	response resp = (response){ .code = 20 };
