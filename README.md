@@ -1,12 +1,12 @@
 # lc19
 
 A simple (<500 SLOC) server for the Gemini protocol written in C.
-The name is an allusion to Launch Complex 19, where NASA launched all of the Gemini manned spaceflights.
+The name is an allusion to Launch Complex 19, where NASA the Gemini spaceflights.
 Tested on GNU/Linux. Created by Theo Henson <theodorehenson at protonmail dot com>.
 
 ## Installation
 
-Requirements:
+The requirements are very minimal and should already be on most GNU/Linux distributions:
 
 * glibc
 * openssl > 1.0.1
@@ -29,7 +29,7 @@ Example:
 
 ```
 text/gemini	index.gmi
-text/gemini	index.gmi	/
+text/gemini	index.gmi /
 text/gemini	about.gmi
 image/png	images/cats.png	/cats.png
 ```
@@ -48,7 +48,19 @@ Example:
 $ lc19 -d gemini/ -c cert.pem -k key.pem
 ```
 
+Reload the endpoints file without restarting the server by sending a SIGHUP signal, e.g.:
+
+```
+$ pkill -HUP lc19
+```
+
 (The port defaults to 1965.)
+
+Creating the endpoints file may seem cumbersome, but its generation can be automated and it provides many benefits:
+
+* Security — Only the files listed are able to be accessed.
+* Customization — You are able to directly change the URL path that files are found at.
+* Simplicity — Specifying the MIME types yourself is the most portable (and simple) method, as you needn't rely on having everything built into the code, or on having external files/programs like `/etc/mime.types` or `file`.
 
 ## License
 
