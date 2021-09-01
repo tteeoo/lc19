@@ -119,6 +119,7 @@ int main(int argc, char **argv) {
 	// Assign signal handlers
 	signal(SIGINT, handle_sigint);
 	signal(SIGHUP, handle_sighup);
+	signal(SIGCHLD, SIG_IGN);
 
 	// Parse command-line arguments
 	argp_parse(&parser, argc, argv, 0, 0, &arguments);
@@ -145,7 +146,7 @@ int main(int argc, char **argv) {
 		// Initialize incoming client
 		struct sockaddr_in addr;
 		socklen_t addrlen = sizeof(addr);
-		SSL *ssl = SSL_new(ctx);
+		SSL *ssl;
 
 		// Accept connection
 		int client;
@@ -153,10 +154,20 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Error: Failed to accept incoming connection");
 			continue;
 		}
-		printf("New: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-		SSL_set_fd(ssl, client);
 
-		handle(ssl, e);
+		printf("New: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+		switch (fork()) {
+		case 0:
+			ssl = SSL_new(ctx);
+			SSL_set_fd(ssl, client);
+			handle(ssl, e);
+			exit(0);
+			break;
+		case -1:
+			fprintf(stderr,"Error: Forking failed.\n");
+		default:
+			close(client);
+		}
 	}
 
 	close(server);
