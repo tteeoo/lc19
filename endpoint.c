@@ -12,6 +12,15 @@
 #define E_FILE "endpoints"
 #define E_FILE_LEN 9
 
+int lines;
+
+// Comparison function for binary search
+static int comp_ep(const void *i1, const void *i2) {
+	const endpoint *ep1 = i1;
+	const endpoint *ep2 = i2;
+	return strcmp(ep1->url_path, ep2->url_path);
+}
+
 // Gets the number of lines in a file
 int line_count(char *file) {
 	int c, count = 0;
@@ -69,20 +78,16 @@ response url_to_response(char *url, endpoint *endpoints) {
 	}
 
 	// Find the endpoint at the url
-	int e_index = -1;
-	for (int i = 0; endpoints[i].end; i++)  {
-		if (strcmp(url_path, endpoints[i].url_path) == 0) {
-			e_index = i;
-			break;
-		}
-	}
-	if (e_index == -1)
+	endpoint *e, key;
+	strcpy(key.url_path, url_path);
+	e = bsearch(&key, endpoints, lines, sizeof(endpoints[0]), comp_ep);
+
+	if (e == NULL)
 		return (response){ .code = 51, .mime = "Not found, à la 404" };
-	endpoint e = endpoints[e_index];
 
 	response resp = (response){ .code = 20 };
-	strcpy(resp.file_path, e.file_path);
-	strcpy(resp.mime, e.mime);
+	strcpy(resp.file_path, e->file_path);
+	strcpy(resp.mime, e->mime);
 	return resp;
 }
 
@@ -123,7 +128,6 @@ void get_endpoints(endpoint *endpoints, char *path) {
 		}
 
 		// Copy the parsed data
-		endpoints[line_num] = (endpoint){ .end = 1 };
 		strcpy(endpoints[line_num].mime, mime);
 		if (url_path[0] == '\0') {
 			strtok(file_path, "\n");
@@ -139,6 +143,8 @@ void get_endpoints(endpoint *endpoints, char *path) {
 		line_num++;
 	}
 
-	endpoints[line_num] = (endpoint){ .end = 0 };
+	lines = line_num;
+	qsort(endpoints, lines, sizeof(endpoints[0]), comp_ep);
+
 	fclose(fp);
 }
