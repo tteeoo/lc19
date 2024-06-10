@@ -2,16 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <malloc.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
-#include <sys/sendfile.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <argp.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+
+#if __APPLE__
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <sys/uio.h>
+#elif
+	#include <sys/sendfile.h>
+#endif
 
 #include "args.h"
 #include "ssl.h"

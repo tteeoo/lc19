@@ -16,6 +16,10 @@ $ make
 # make install
 ```
 
+### macOS compatibility
+
+The server should also work on macOS, but you will need to `brew install argp-standalone` and at the `-I`, `-L`, and `-l` options to the Makefile for the installed location.
+
 ## Usage
 
 Create the file "endpoints" in the root of the specified directory, with tab separated values for each endpoint:
