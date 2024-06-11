@@ -11,11 +11,11 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#if __APPLE__
+#ifdef __APPLE__
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <sys/uio.h>
-#elif
+#else
 	#include <sys/sendfile.h>
 #endif
 
